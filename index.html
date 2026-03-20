@@ -7,65 +7,88 @@
     <style>
         body {
             background-color: #05070a;
-            /* Using a public satellite map image as a faded background */
-            background-image: linear-gradient(rgba(5, 7, 10, 0.85), rgba(5, 7, 10, 0.85)), 
-                              url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Middle_East_topographic_map-blank.svg/1024px-Middle_East_topographic_map-blank.svg.png');
-            background-size: cover;
-            background-position: center;
-            color: #00ff41; /* "Matrix" / Radar Green */
-            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
+            color: #00ff41;
+        }
+
+        /* TACTICAL MAP BACKGROUND */
+        .map-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* High contrast topographic map */
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/23/Middle_East_topographic_map-blank.svg');
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) invert(100%) opacity(15%); /* Makes it look like a green radar screen */
+            z-index: -1;
         }
 
         .hud-frame {
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            background: rgba(0, 10, 0, 0.7);
-            padding: 30px;
-            border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            border: 1px solid rgba(0, 255, 65, 0.4);
+            background: rgba(0, 15, 0, 0.85);
+            backdrop-filter: blur(5px);
+            padding: 40px;
+            border-radius: 2px;
+            box-shadow: inset 0 0 50px rgba(0, 255, 65, 0.1), 0 0 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 80%;
-            max-width: 900px;
+            width: 85%;
+            max-width: 800px;
+            position: relative;
         }
+
+        /* Scanning Line Effect */
+        .hud-frame::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 255, 65, 0.2);
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
         .header {
             width: 100%;
             display: flex;
             justify-content: space-between;
             border-bottom: 1px solid rgba(0, 255, 65, 0.3);
-            margin-bottom: 20px;
-            padding-bottom: 5px;
-            font-size: 0.8rem;
+            margin-bottom: 25px;
+            padding-bottom: 8px;
+            font-size: 0.75rem;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
-        /* --- ANALOG CLOCK DESIGN --- */
+        /* --- ANALOG DIAL --- */
         .analog-clock {
-            width: 250px;
-            height: 250px;
-            border: 4px solid #00ff41;
+            width: 220px;
+            height: 220px;
+            border: 2px solid #00ff41;
             border-radius: 50%;
             position: relative;
-            margin: 20px 0;
-            background: radial-gradient(circle, rgba(0,255,65,0.05) 0%, rgba(0,0,0,1) 100%);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            margin-bottom: 20px;
+            background: radial-gradient(circle, rgba(0,255,65,0.1) 0%, transparent 80%);
         }
 
-        /* Clock markings (the 12, 3, 6, 9 ticks) */
+        /* Hour markings */
         .analog-clock::after {
             content: '';
             position: absolute;
             width: 100%; height: 100%;
-            background: repeating-conic-gradient(from 0deg, #00ff41 0deg 1deg, transparent 1deg 90deg);
+            background: repeating-conic-gradient(from 0deg, #00ff41 0deg 1deg, transparent 1deg 30deg);
             border-radius: 50%;
-            mask: radial-gradient(transparent 92%, black 93%);
+            mask: radial-gradient(transparent 90%, black 91%);
         }
 
         .hand {
@@ -74,50 +97,49 @@
             left: 50%;
             transform-origin: bottom;
             background: #00ff41;
-            border-radius: 10px;
-            transition: transform 1s cubic-bezier(0.4, 2.3, 0.3, 1);
+            border-radius: 2px;
+            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .hour-hand { width: 6px; height: 60px; margin-left: -3px; z-index: 3; }
-        .min-hand { width: 4px; height: 90px; margin-left: -2px; z-index: 2; background: #fff; }
+        .hour-hand { width: 4px; height: 55px; margin-left: -2px; z-index: 3; }
+        .min-hand { width: 2px; height: 85px; margin-left: -1px; z-index: 2; background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* --- DIGITAL HUD DISPLAY --- */
         .digital-readout {
-            font-size: 4rem;
-            font-weight: bold;
-            margin: 10px 0;
+            font-size: 5rem;
+            font-weight: 900;
             color: #fff;
-            text-shadow: 0 0 10px #00ff41;
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+            margin: 10px 0;
+            letter-spacing: -2px;
         }
 
         .stats-panel {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 15px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 30px;
             border-top: 1px solid rgba(0, 255, 65, 0.3);
-            padding-top: 20px;
+            padding-top: 25px;
         }
 
-        .stat-box { text-align: center; }
-        .stat-label { font-size: 0.7rem; color: #00ff41; opacity: 0.7; margin-bottom: 5px; }
-        .stat-value { font-size: 1.2rem; color: #fff; }
+        .stat-box { text-align: center; border-right: 1px solid rgba(0,255,65,0.1); }
+        .stat-box:last-child { border-right: none; }
+        .stat-label { font-size: 0.65rem; opacity: 0.6; margin-bottom: 8px; font-weight: bold; }
+        .stat-value { font-size: 1.1rem; color: #fff; font-family: 'Courier New', monospace; }
 
-        .blinker {
-            animation: blink 1s infinite;
-            color: #ff3333;
-            font-weight: bold;
-        }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .blinker { color: #ff3b3b; animation: blink 1.2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
+<div class="map-bg"></div>
+
 <div class="hud-frame">
     <div class="header">
-        <div>SYSTEM: RESOLUTION_ENGINE_V1.0</div>
-        <div class="blinker">● LIVE_FEED</div>
+        <div>STATUS: DEPLOYED_V1.2</div>
+        <div><span class="blinker">●</span> RECON_MODE: ACTIVE</div>
     </div>
 
     <div class="analog-clock">
@@ -125,7 +147,7 @@
         <div id="min-hand" class="hand min-hand"></div>
     </div>
 
-    <div class="digital-readout" id="digital-clock">00:00</div>
+    <div class="digital-readout" id="digital-clock">--:--</div>
 
     <div class="stats-panel">
         <div class="stat-box">
@@ -133,11 +155,11 @@
             <div class="stat-value" id="oil-price">$--</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">NET FLUX</div>
+            <div class="stat-label">NET SHIFT</div>
             <div class="stat-value" id="last-shift">--m</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">KINETIC EVT</div>
+            <div class="stat-label">KINETIC_EV</div>
             <div class="stat-value" id="kinetic-count">0</div>
         </div>
         <div class="stat-box">
@@ -145,9 +167,9 @@
             <div class="stat-value" id="treaty-count">0</div>
         </div>
     </div>
-
-    <div style="margin-top: 20px; font-size: 0.6rem; opacity: 0.5;">
-        COORDINATES: MIDDLE_EAST_ZONE | LAST_UPDATE: <span id="update-time">--</span>
+    
+    <div style="margin-top: 25px; font-size: 0.6rem; opacity: 0.4; letter-spacing: 1px;">
+        DATASET_ID: <span id="update-time">--</span> | RECTIFY_EPOCH: 420.0
     </div>
 </div>
 
@@ -157,33 +179,23 @@
             const response = await fetch('clock_state.json');
             const data = await response.json();
 
-            // 1. Update Digital Display
             document.getElementById('digital-clock').innerText = data.formatted_time;
 
-            // 2. Update Analog Hands
-            // (Math: 1 minute = 6 degrees on a clock. 1 hour = 30 degrees)
             const totalMinutes = data.current_minutes;
-            const hours = totalMinutes / 60;
-            const mins = totalMinutes % 60;
-
-            const hourDeg = (hours * 30);
-            const minDeg = (mins * 6);
+            const hourDeg = (totalMinutes / 60) * 30; // 360 degrees / 12 hours
+            const minDeg = (totalMinutes % 60) * 6;   // 360 degrees / 60 mins
 
             document.getElementById('hour-hand').style.transform = `rotate(${hourDeg}deg)`;
             document.getElementById('min-hand').style.transform = `rotate(${minDeg}deg)`;
 
-            // 3. Update Stats
             document.getElementById('oil-price').innerText = "$" + data.latest_oil_price.toFixed(2);
             document.getElementById('last-shift').innerText = (data.last_shift > 0 ? "+" : "") + data.last_shift + "m";
             document.getElementById('kinetic-count').innerText = data.ai_readout.kinetic_events;
             document.getElementById('treaty-count').innerText = data.ai_readout.international_treaties;
-            document.getElementById('update-time').innerText = new Date(data.timestamp).toLocaleTimeString();
+            document.getElementById('update-time').innerText = data.timestamp;
 
-        } catch (error) {
-            console.error("HUD Link Failure:", error);
-        }
+        } catch (e) { console.error("HUD Error", e); }
     }
-
     updateHUD();
 </script>
 
