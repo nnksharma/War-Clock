@@ -1,94 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESOLUTION CLOCK | TACTICAL HUD</title>
+    <title>दी-War Clock | The Resolution Engine</title>
     <style>
+        :root {
+            --accent: #ffb400; /* Tactical Amber/Gold */
+            --bg: #080808;
+            --panel: rgba(15, 15, 15, 0.9);
+        }
+
         body {
-            background-color: #05070a;
-            margin: 0;
-            height: 100vh;
+            background-color: var(--bg);
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),
+                              url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-            color: #00ff41;
+            height: 100vh;
+            margin: 0;
         }
 
-        /* TACTICAL MAP BACKGROUND */
-        .map-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* High contrast topographic map */
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/23/Middle_East_topographic_map-blank.svg');
-            background-size: cover;
-            background-position: center;
-            filter: grayscale(100%) invert(100%) opacity(15%); /* Makes it look like a green radar screen */
-            z-index: -1;
-        }
-
-        .hud-frame {
-            border: 1px solid rgba(0, 255, 65, 0.4);
-            background: rgba(0, 15, 0, 0.85);
-            backdrop-filter: blur(5px);
+        .main-container {
+            background: var(--panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,180,0,0.2);
             padding: 40px;
             border-radius: 2px;
-            box-shadow: inset 0 0 50px rgba(0, 255, 65, 0.1), 0 0 30px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 85%;
-            max-width: 800px;
-            position: relative;
+            text-align: center;
+            width: 450px;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        /* Scanning Line Effect */
-        .hud-frame::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(0, 255, 65, 0.2);
-            animation: scan 4s linear infinite;
-        }
-
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
-            margin-bottom: 25px;
-            padding-bottom: 8px;
-            font-size: 0.75rem;
+        /* --- THE DEVANAGARI WORDPLAY --- */
+        .title-brand {
+            font-size: 1.8rem;
             letter-spacing: 2px;
+            margin-bottom: 5px;
+            font-weight: 300;
+        }
+
+        .hindi-text {
+            color: var(--accent);
+            font-weight: bold;
+            font-family: 'Arial Unicode MS', 'Lohit Hindi', sans-serif;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
             text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,180,0,0.1);
+            padding-bottom: 10px;
         }
 
         /* --- ANALOG DIAL --- */
-        .analog-clock {
-            width: 220px;
-            height: 220px;
-            border: 2px solid #00ff41;
-            border-radius: 50%;
+        .clock-box {
             position: relative;
-            margin-bottom: 20px;
-            background: radial-gradient(circle, rgba(0,255,65,0.1) 0%, transparent 80%);
-        }
-
-        /* Hour markings */
-        .analog-clock::after {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            background: repeating-conic-gradient(from 0deg, #00ff41 0deg 1deg, transparent 1deg 30deg);
+            width: 240px;
+            height: 240px;
+            margin: 0 auto 20px;
+            border: 1px solid rgba(255,180,0,0.1);
             border-radius: 50%;
-            mask: radial-gradient(transparent 90%, black 91%);
+            background: radial-gradient(circle, rgba(255,180,0,0.05) 0%, transparent 70%);
         }
 
         .hand {
@@ -96,107 +77,84 @@
             bottom: 50%;
             left: 50%;
             transform-origin: bottom;
-            background: #00ff41;
+            background: var(--accent);
             border-radius: 2px;
-            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 2s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .hour-hand { width: 4px; height: 55px; margin-left: -2px; z-index: 3; }
-        .min-hand { width: 2px; height: 85px; margin-left: -1px; z-index: 2; background: #fff; box-shadow: 0 0 10px #fff; }
+        .hour-hand { width: 4px; height: 60px; margin-left: -2px; }
+        .min-hand { width: 2px; height: 95px; margin-left: -1px; background: #fff; }
 
-        .digital-readout {
-            font-size: 5rem;
-            font-weight: 900;
+        .digital-time {
+            font-size: 4rem;
+            font-family: 'Courier New', monospace;
             color: #fff;
-            text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
             margin: 10px 0;
-            letter-spacing: -2px;
         }
 
-        .stats-panel {
+        .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            width: 100%;
-            margin-top: 30px;
-            border-top: 1px solid rgba(0, 255, 65, 0.3);
-            padding-top: 25px;
+            margin-top: 20px;
+            text-align: left;
         }
 
-        .stat-box { text-align: center; border-right: 1px solid rgba(0,255,65,0.1); }
-        .stat-box:last-child { border-right: none; }
-        .stat-label { font-size: 0.65rem; opacity: 0.6; margin-bottom: 8px; font-weight: bold; }
-        .stat-value { font-size: 1.1rem; color: #fff; font-family: 'Courier New', monospace; }
+        .stat-val { font-family: 'Courier New', monospace; color: var(--accent); font-size: 1.1rem; }
+        .stat-name { font-size: 0.6rem; text-transform: uppercase; opacity: 0.5; }
 
-        .blinker { color: #ff3b3b; animation: blink 1.2s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="map-bg"></div>
+<div class="main-container">
+    <div class="title-brand">
+        <span class="hindi-text">दी-</span>War Clock
+    </div>
+    <div class="subtitle">Resolution Engine</div>
 
-<div class="hud-frame">
-    <div class="header">
-        <div>STATUS: DEPLOYED_V1.2</div>
-        <div><span class="blinker">●</span> RECON_MODE: ACTIVE</div>
+    <div class="clock-box">
+        <div id="h-hand" class="hand hour-hand"></div>
+        <div id="m-hand" class="hand min-hand"></div>
     </div>
 
-    <div class="analog-clock">
-        <div id="hour-hand" class="hand hour-hand"></div>
-        <div id="min-hand" class="hand min-hand"></div>
-    </div>
-
-    <div class="digital-readout" id="digital-clock">--:--</div>
-
-    <div class="stats-panel">
-        <div class="stat-box">
-            <div class="stat-label">BRENT CRUDE</div>
-            <div class="stat-value" id="oil-price">$--</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">NET SHIFT</div>
-            <div class="stat-value" id="last-shift">--m</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">KINETIC_EV</div>
-            <div class="stat-value" id="kinetic-count">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">DIPLOMACY</div>
-            <div class="stat-value" id="treaty-count">0</div>
-        </div>
-    </div>
+    <div class="digital-time" id="d-time">--:--</div>
     
-    <div style="margin-top: 25px; font-size: 0.6rem; opacity: 0.4; letter-spacing: 1px;">
-        DATASET_ID: <span id="update-time">--</span> | RECTIFY_EPOCH: 420.0
+    <div class="grid">
+        <div>
+            <div class="stat-name">Brent Crude</div>
+            <div class="stat-val" id="oil">$ --</div>
+        </div>
+        <div>
+            <div class="stat-name">Net Shift</div>
+            <div class="stat-val" id="shift">-- m</div>
+        </div>
+        <div>
+            <div class="stat-name">Kinetic Events</div>
+            <div class="stat-val" id="kinetic">0</div>
+        </div>
+        <div>
+            <div class="stat-name">Last Update</div>
+            <div class="stat-val" id="time" style="font-size: 0.7rem;">--</div>
+        </div>
     </div>
 </div>
 
 <script>
-    async function updateHUD() {
+    async function update() {
         try {
-            const response = await fetch('clock_state.json');
-            const data = await response.json();
-
-            document.getElementById('digital-clock').innerText = data.formatted_time;
-
-            const totalMinutes = data.current_minutes;
-            const hourDeg = (totalMinutes / 60) * 30; // 360 degrees / 12 hours
-            const minDeg = (totalMinutes % 60) * 6;   // 360 degrees / 60 mins
-
-            document.getElementById('hour-hand').style.transform = `rotate(${hourDeg}deg)`;
-            document.getElementById('min-hand').style.transform = `rotate(${minDeg}deg)`;
-
-            document.getElementById('oil-price').innerText = "$" + data.latest_oil_price.toFixed(2);
-            document.getElementById('last-shift').innerText = (data.last_shift > 0 ? "+" : "") + data.last_shift + "m";
-            document.getElementById('kinetic-count').innerText = data.ai_readout.kinetic_events;
-            document.getElementById('treaty-count').innerText = data.ai_readout.international_treaties;
-            document.getElementById('update-time').innerText = data.timestamp;
-
-        } catch (e) { console.error("HUD Error", e); }
+            const r = await fetch('clock_state.json');
+            const d = await r.json();
+            document.getElementById('d-time').innerText = d.formatted_time;
+            document.getElementById('h-hand').style.transform = `rotate(${(d.current_minutes/60)*30}deg)`;
+            document.getElementById('m-hand').style.transform = `rotate(${(d.current_minutes%60)*6}deg)`;
+            document.getElementById('oil').innerText = "$" + d.latest_oil_price.toFixed(2);
+            document.getElementById('shift').innerText = (d.last_shift > 0 ? "+" : "") + d.last_shift + "m";
+            document.getElementById('kinetic').innerText = d.ai_readout.kinetic_events;
+            document.getElementById('time').innerText = new Date(d.timestamp).toLocaleTimeString();
+        } catch(e) { console.log(e); }
     }
-    updateHUD();
+    update();
 </script>
 
 </body>
