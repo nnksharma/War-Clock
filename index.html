@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Resolution Clock</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        .clock-container {
+            text-align: center;
+            border: 2px solid #333;
+            padding: 40px 60px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #111, #000);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #888;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .time-display {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #ff3333; /* Threat Red */
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+            margin: 20px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .positive-shift { color: #4caf50; } /* Green for peace */
+        .negative-shift { color: #ff3333; } /* Red for escalation */
+    </style>
+</head>
+<body>
+
+    <div class="clock-container">
+        <h1>Geopolitical Resolution Clock</h1>
+        
+        <div class="time-display" id="clock-face">--:--</div>
+        
+        <div class="stats-grid">
+            <div>
+                <div>Brent Crude (Oil): <span class="stat-value" id="oil-price">$--</span></div>
+                <div>Last Shift: <span class="stat-value" id="last-shift">-- mins</span></div>
+            </div>
+            <div>
+                <div>Kinetic Events: <span class="stat-value" id="kinetic-count">--</span></div>
+                <div>Treaties Signed: <span class="stat-value" id="treaty-count">--</span></div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 0.8rem; color: #666;">
+            Last Updated: <span id="update-time">--</span>
+        </div>
+    </div>
+
+    <script>
+        // This Javascript function fetches the JSON file and updates the HTML
+        async function updateClockUI() {
+            try {
+                // Read the JSON file our Python script made
+                const response = await fetch('clock_state.json');
+                const data = await response.json();
+
+                // Update the big clock face
+                document.getElementById('clock-face').innerText = data.formatted_time;
+                
+                // Update the oil price
+                document.getElementById('oil-price').innerText = "$" + data.latest_oil_price.toFixed(2);
+                
+                // Update the shift with colors
+                const shiftElement = document.getElementById('last-shift');
+                let shiftText = data.last_shift > 0 ? "+" + data.last_shift : data.last_shift;
+                shiftElement.innerText = shiftText + " mins";
+                shiftElement.className = data.last_shift >= 0 ? "stat-value positive-shift" : "stat-value negative-shift";
+
+                // Update the AI readout stats
+                document.getElementById('kinetic-count').innerText = data.ai_readout.kinetic_events;
+                document.getElementById('treaty-count').innerText = data.ai_readout.international_treaties;
+                
+                // Show when it was last updated
+                const dateObj = new Date(data.timestamp);
+                document.getElementById('update-time').innerText = dateObj.toLocaleString();
+
+            } catch (error) {
+                console.error("Could not load clock state:", error);
+                document.getElementById('clock-face').innerText = "ERR";
+            }
+        }
+
+        // Run the update function as soon as the page loads
+        updateClockUI();
+    </script>
+</body>
+</html>
