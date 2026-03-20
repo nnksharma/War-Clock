@@ -2,13 +2,12 @@ import feedparser
 import requests
 import json
 import time
-import os  # NEW: Required to read hidden cloud secrets
+import os 
 from datetime import datetime, timezone, timedelta
 from google import genai
 from google.genai import types
 
 # --- CONFIGURATION & CONSTANTS ---
-# NEW: The script now securely asks the cloud server for the hidden keys
 ALPHA_VANTAGE_KEY = os.environ.get('ALPHA_VANTAGE_KEY')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
