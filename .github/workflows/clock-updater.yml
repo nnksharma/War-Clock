@@ -1,0 +1,40 @@
+name: Resolution Clock Engine
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+  workflow_dispatch:       # Allows us to test it manually
+
+permissions:
+  contents: write
+
+jobs:
+  update-clock:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install feedparser requests google-genai
+
+      - name: Run Master Engine
+        env:
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python master_engine.py
+
+      - name: Save and Commit Updated JSON
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add clock_state.json
+          git commit -m "Auto-update clock state [skip ci]" || exit 0
+          git push
