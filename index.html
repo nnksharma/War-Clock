@@ -55,10 +55,11 @@
             font-size: 0.65rem;
             text-transform: uppercase;
             color: rgba(255,255,255,0.4);
-            letter-spacing: 5px;
+            letter-spacing: 2px;
             margin-bottom: 30px;
             border-bottom: 1px solid rgba(255,180,0,0.1);
-            padding-bottom: 10px;
+            padding-bottom: 15px;
+            line-height: 1.4;
         }
 
         /* --- THE CLOCK --- */
@@ -117,8 +118,22 @@
             margin-top: 10px;
         }
 
-        .credit {
+        .footer-meta {
             margin-top: 25px;
+            border-top: 1px solid rgba(255,180,0,0.1);
+            padding-top: 15px;
+        }
+
+        .update-stamp {
+            font-size: 0.6rem;
+            color: var(--accent);
+            opacity: 0.8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .credit {
             font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -134,7 +149,7 @@
     <div class="title-brand">
         <span class="hindi-text">दी-</span>War Clock
     </div>
-    <div class="subtitle">“The supreme art of war is to subdue the enemy without fighting.” ― Sun Tzu, The Art of War.</div>
+    <div class="subtitle">“The supreme art of war is to subdue the enemy without fighting.”<br>― Sun Tzu</div>
 
     <div class="clock-box">
         <div id="h-hand" class="hand hour-hand"></div>
@@ -149,7 +164,7 @@
             <div class="stat-val" id="oil">$ --</div>
         </div>
         <div>
-            <div class="stat-name">Systemic Flux</div>
+            <div class="stat-name">Last Shift</div>
             <div class="stat-val" id="shift">-- m</div>
         </div>
         <div>
@@ -163,16 +178,18 @@
     </div>
 
     <div class="brief-section">
-        <b>Abstract:</b> The दी-War Clock is a real-time mathematical model of regional stability of the ongoing conflict at Middle East. 
+        <b>Abstract:</b> The दी-War Clock is a real-time mathematical model of regional stability regarding the ongoing conflict in the Middle East. 
         Utilizing a crude mathematical model, the system processes live 
         economic data (Brent Crude) and classifies 6-hour headline windows via LLM analysis. 
         Midnight (00:00) represents total systemic collapse, while Noon (12:00) represents 
-        absolute resolution. The needle fluctuates based on the tension between kinetic 
-        escalation and diplomatic intervention.
+        absolute resolution.
     </div>
 
-    <div class="credit">
-        Imagined by <b>@Nayan</b> with the help of <b>Gemini</b>
+    <div class="footer-meta">
+        <div class="update-stamp">Last System Update: <span id="stamp">--</span></div>
+        <div class="credit">
+            Imagined by <b>@Nayan</b> with the help of <b>Gemini</b>
+        </div>
     </div>
 </div>
 
@@ -188,6 +205,10 @@
             document.getElementById('shift').innerText = (d.last_shift > 0 ? "+" : "") + d.last_shift + "m";
             document.getElementById('kinetic').innerText = d.ai_readout.kinetic_events;
             document.getElementById('treaty').innerText = d.ai_readout.international_treaties;
+            
+            // Added logic to display the timestamp
+            const date = new Date(d.timestamp);
+            document.getElementById('stamp').innerText = date.toLocaleString();
         } catch(e) { console.log("Stream Offline", e); }
     }
     update();
