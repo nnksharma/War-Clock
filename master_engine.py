@@ -3,6 +3,8 @@ import requests
 import json
 import time
 import os 
+import requests
+from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
 from google import genai
 from google.genai import types
@@ -30,21 +32,32 @@ def format_time(minutes):
 
 # --- SENSORS (Phase 2) ---
 def get_live_oil_price(last_known_price):
-    if not ALPHA_VANTAGE_KEY:
-        print("⚠️ No Alpha Vantage Key found in environment. Using fallback.")
-        return last_known_price
-        
-    url = f'https://www.alphavantage.co/query?function=BRENT&interval=daily&apikey={ALPHA_VANTAGE_KEY}'
+    print("🌐 Connecting to Global Energy Feed (OilPrice.com)...")
+    url = "https://oilprice.com/oil-price-charts/"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+
     try:
-        response = requests.get(url)
-        data = response.json()
-        # Add this diagnostic line:
-        print(f"🔍 Alpha Vantage Raw Response: {data}")
-        if "data" in data and len(data["data"]) > 0:
-            return float(data["data"][0]["value"])
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # We look for the 'Brent Crude' label in the table
+            # Using 'string' instead of 'text' to keep it modern
+            brent_label = soup.find(string="Brent Crude")
+            
+            if brent_label:
+                # Find the next <td> which contains the price
+                price_text = brent_label.find_next('td').text.strip()
+                live_price = float(price_text.replace(",", ""))
+                print(f"✅ Scraper Success! Brent Crude: ${live_price:.2f}")
+                return live_price
+                
+        print(f"⚠️ Site reached but returned Status {response.status_code}")
     except Exception as e:
-        print(f"⚠️ API Error ({e}). Using last known price: ${last_known_price}")
-    return last_known_price 
+        print(f"⚠️ Scraping Error: {e}")
+        
+    print(f"🔄 Using Fallback Price: ${last_known_price}")
+    return last_known_price
 
 def harvest_latest_news():
     RSS_URLS = [
