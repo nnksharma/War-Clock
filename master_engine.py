@@ -85,7 +85,27 @@ def harvest_latest_news():
             continue
             
     return fresh_headlines
+    
+  def filter_new_articles(all_articles, memory_file='seen_news.json'):
+    # 1. Load the list of news IDs we have already processed
+    if os.path.exists(memory_file):
+        with open(memory_file, 'r') as f:
+            seen_ids = set(json.load(f))
+    else:
+        seen_ids = set()
 
+    # 2. Filter out articles that are already in our memory bank
+    new_articles = [a for a in all_articles if a.get('guid') not in seen_ids]
+    
+    # 3. Update the memory bank with the IDs of the articles we are about to process
+    updated_ids = list(seen_ids.union([a.get('guid') for a in new_articles]))
+    # Keep only the last 200 IDs to keep the file small
+    with open(memory_file, 'w') as f:
+        json.dump(updated_ids[-200:], f)
+        
+    print(f"📡 Found {len(all_articles)} total articles. {len(new_articles)} are NEW since last 3 hours.")
+    return new_articles
+      
 # --- THE LLM BRAIN (Phase 3) ---
 def get_ai_analysis(headlines):
     if not headlines:
@@ -105,6 +125,13 @@ def get_ai_analysis(headlines):
       "new_state_actors": 0,
       "international_treaties": 0
     }
+        Current Baseline: {clock_state['formatted_time']}
+        Current Oil: ${clock_state['latest_oil_price']}
+
+        TASK: Analyze the following NEW news headlines from the last 3 hours. 
+        Only calculate the 'Delta' (the change). 
+        If a kinetic strike happened 5 hours ago, it has already been counted—IGNORE IT. 
+        ONLY count strikes or events that appear in this specific list.
     """
     prompt_text = "Headlines:\n" + "\n".join([f"- {h}" for h in headlines])
     
