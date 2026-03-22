@@ -68,11 +68,10 @@ def harvest_latest_news():
         "https://www.theguardian.com/world/middleeast/rss"
     ]
     
-    # 1. Set the 3-hour cutoff window
-    cutoff_window = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=3)
+    # Corrected time window logic for 'from datetime import datetime, timezone, timedelta'
+    cutoff_window = datetime.now(timezone.utc) - timedelta(hours=3)
     fresh_headlines = []
     
-    # 2. Load the Memory Bank (seen_news.json)
     memory_file = 'seen_news.json'
     seen_ids = set()
     if os.path.exists(memory_file):
@@ -84,19 +83,16 @@ def harvest_latest_news():
 
     current_run_ids = []
 
-    # 3. Harvest and Filter in one loop
     for url in RSS_URLS:
         try:
             feed = feedparser.parse(url)
             for entry in feed.entries:
-                # Every news article has a unique ID (guid) or link
                 guid = entry.get('id') or entry.get('link')
                 
                 try:
-                    # Convert article time to UTC
-                    article_time = datetime.datetime.fromtimestamp(time.mktime(entry.published_parsed), datetime.timezone.utc)
+                    # Convert article time using time.mktime
+                    article_time = datetime.fromtimestamp(time.mktime(entry.published_parsed), timezone.utc)
                     
-                    # LOGIC: Must be within 3 hours AND never seen before
                     if article_time > cutoff_window and guid not in seen_ids:
                         fresh_headlines.append(entry.title)
                         current_run_ids.append(guid)
@@ -106,13 +102,12 @@ def harvest_latest_news():
             print(f"⚠️ Feed Error ({url}): {e}")
             continue
     
-    # 4. Save new fingerprints back to the Memory Bank
     updated_memory = list(seen_ids.union(current_run_ids))
     with open(memory_file, 'w') as f:
-        json.dump(updated_memory[-200:], f) # We keep the last 200 IDs
+        json.dump(updated_memory[-200:], f) 
             
-    print(f"📡 Found {len(fresh_headlines)} NEW headlines since the last run.")
-    return list(set(fresh_headlines)) # Remove exact string duplicates
+    print(f"📡 Memory Check: {len(fresh_headlines)} NEW headlines captured.")
+    return list(set(fresh_headlines))
       
 # --- THE LLM BRAIN (Phase 3) ---
 def get_ai_analysis(headlines):
