@@ -67,44 +67,52 @@ def harvest_latest_news():
         "http://rss.cnn.com/rss/edition_world.rss",
         "https://www.theguardian.com/world/middleeast/rss"
     ]
-    cutoff_window = datetime.now(timezone.utc) - timedelta(hours=6)
+    
+    # 1. Set the 3-hour cutoff window
+    cutoff_window = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=3)
     fresh_headlines = []
     
+    # 2. Load the Memory Bank (seen_news.json)
+    memory_file = 'seen_news.json'
+    seen_ids = set()
+    if os.path.exists(memory_file):
+        try:
+            with open(memory_file, 'r') as f:
+                seen_ids = set(json.load(f))
+        except:
+            seen_ids = set()
+
+    current_run_ids = []
+
+    # 3. Harvest and Filter in one loop
     for url in RSS_URLS:
         try:
             feed = feedparser.parse(url)
             for entry in feed.entries:
+                # Every news article has a unique ID (guid) or link
+                guid = entry.get('id') or entry.get('link')
+                
                 try:
-                    article_time = datetime.fromtimestamp(time.mktime(entry.published_parsed), timezone.utc)
-                    if article_time > cutoff_window:
+                    # Convert article time to UTC
+                    article_time = datetime.datetime.fromtimestamp(time.mktime(entry.published_parsed), datetime.timezone.utc)
+                    
+                    # LOGIC: Must be within 3 hours AND never seen before
+                    if article_time > cutoff_window and guid not in seen_ids:
                         fresh_headlines.append(entry.title)
+                        current_run_ids.append(guid)
                 except:
                     continue
-        except:
-            print(f"⚠️ Could not read feed: {url}")
+        except Exception as e:
+            print(f"⚠️ Feed Error ({url}): {e}")
             continue
-            
-    return fresh_headlines
     
-  def filter_new_articles(all_articles, memory_file='seen_news.json'):
-    # 1. Load the list of news IDs we have already processed
-    if os.path.exists(memory_file):
-        with open(memory_file, 'r') as f:
-            seen_ids = set(json.load(f))
-    else:
-        seen_ids = set()
-
-    # 2. Filter out articles that are already in our memory bank
-    new_articles = [a for a in all_articles if a.get('guid') not in seen_ids]
-    
-    # 3. Update the memory bank with the IDs of the articles we are about to process
-    updated_ids = list(seen_ids.union([a.get('guid') for a in new_articles]))
-    # Keep only the last 200 IDs to keep the file small
+    # 4. Save new fingerprints back to the Memory Bank
+    updated_memory = list(seen_ids.union(current_run_ids))
     with open(memory_file, 'w') as f:
-        json.dump(updated_ids[-200:], f)
-        
-    print(f"📡 Found {len(all_articles)} total articles. {len(new_articles)} are NEW since last 3 hours.")
-    return new_articles
+        json.dump(updated_memory[-200:], f) # We keep the last 200 IDs
+            
+    print(f"📡 Found {len(fresh_headlines)} NEW headlines since the last run.")
+    return list(set(fresh_headlines)) # Remove exact string duplicates
       
 # --- THE LLM BRAIN (Phase 3) ---
 def get_ai_analysis(headlines):
