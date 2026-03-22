@@ -38,6 +38,8 @@ def get_live_oil_price(last_known_price):
     try:
         response = requests.get(url)
         data = response.json()
+        # Add this diagnostic line:
+        print(f"🔍 Alpha Vantage Raw Response: {data}")
         if "data" in data and len(data["data"]) > 0:
             return float(data["data"][0]["value"])
     except Exception as e:
