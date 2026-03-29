@@ -120,7 +120,7 @@ def get_ai_analysis(headlines):
         
     client = genai.Client(api_key=GEMINI_API_KEY)
     system_instruction = """
-    You are a strictly objective geopolitical data-extraction algorithm. Read the provided list of news headlines from the last 6 hours.
+    You are a strictly objective geopolitical data-extraction algorithm. Read the provided list of news headlines from the last 3 hours.
     EXPECTED OUTPUT FORMAT (Strict JSON only):
     {
       "kinetic_events": 0,
