@@ -1,8 +1,8 @@
 {
-    "timestamp": "2026-04-18T15:38:06.533681+00:00",
-    "current_minutes": 0.97,
+    "timestamp": "2026-04-18T18:53:06.681691+00:00",
+    "current_minutes": 0.95,
     "formatted_time": "12:00",
-    "last_shift": -0.03,
+    "last_shift": -0.02,
     "latest_oil_price": 90.38,
     "ai_readout": {
         "kinetic_events": 2,
