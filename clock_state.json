@@ -1,9 +1,9 @@
 {
-    "timestamp": "2026-05-06T02:52:33.291177+00:00",
-    "current_minutes": 1.37,
+    "timestamp": "2026-05-06T06:05:58.146259+00:00",
+    "current_minutes": 1.4,
     "formatted_time": "12:01",
     "last_shift": 0.03,
-    "latest_oil_price": 108.06,
+    "latest_oil_price": 108.49,
     "ai_readout": {
         "kinetic_events": 0,
         "infrastructure_sites": 0,
