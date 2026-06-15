@@ -1,13 +1,13 @@
 {
-    "timestamp": "2026-06-15T19:03:45.463831+00:00",
-    "current_minutes": 0.78,
+    "timestamp": "2026-06-15T23:02:47.217408+00:00",
+    "current_minutes": 0.81,
     "formatted_time": "12:00",
-    "last_shift": 0.13,
-    "latest_oil_price": 83.39,
+    "last_shift": 0.03,
+    "latest_oil_price": 83.17,
     "ai_readout": {
-        "kinetic_events": 3,
+        "kinetic_events": 0,
         "infrastructure_sites": 0,
         "new_state_actors": 0,
-        "international_treaties": 2
+        "international_treaties": 0
     }
 }
