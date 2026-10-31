@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-31T11:46:14.697446+00:00",
+    "timestamp": "2026-10-31T16:54:04.271456+00:00",
     "current_minutes": 0.01,
     "formatted_time": "12:00",
     "last_shift": 0.0,
@@ -8,6 +8,6 @@
         "kinetic_events": 0,
         "infrastructure_sites": 0,
         "new_state_actors": 0,
-        "international_treaties": 0
+        "international_treaties": 1
     }
 }
